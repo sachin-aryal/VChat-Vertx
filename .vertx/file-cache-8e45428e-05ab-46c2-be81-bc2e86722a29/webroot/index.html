@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VChat</title>
+    <script src="Js/jquery-1.10.2.js"></script>
+    <script src="Js/sock-js.js"></script>
+    <script src="Js/vertx-eventBus.js"></script>
+    <script src="Js/vertx.js"></script>
+    <script type="text/javascript">
+        var eb = null;
+
+        eb = new EventBus("http://localhost:8080/loginUrl");
+        eb.onopen = function () {
+            console.log("Connection Open")
+        };
+
+        eb.onclose = function () {
+            console.log("Connection Close")
+        };
+
+        eb.registerHandler("server-to-client", function (message) {
+            console.log('received a message: ' + message.body());
+        });
+
+        // publish a message
+        function sendMes(message){
+            console.log("Sending Message "+message);
+            eb.send("client-to-server", message);
+        }
+    </script>
+</head>
+<body>
+    <a href="#">Login with Twiiter</a>
+    <button onclick="sendMes('Hello')">Click</button>
+</body>
+</html>
