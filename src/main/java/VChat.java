@@ -56,6 +56,8 @@ public class VChat extends AbstractVerticle{
         router.route().handler(CookieHandler.create());
         SessionStore store = LocalSessionStore.create(vertx);
         SessionHandler sessionHandler = SessionHandler.create(store);
+      /*  AuthHandler basicAuthHandler = BasicAuthHandler.create(authProvider);
+        router.route().handler(UserSessionHandler.create(authProvider));*/
 
 
         router.route().handler(sessionHandler);
