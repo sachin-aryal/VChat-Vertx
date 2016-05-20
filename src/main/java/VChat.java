@@ -2,12 +2,16 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.Session;
+import io.vertx.ext.web.handler.*;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
+import io.vertx.ext.web.sstore.LocalSessionStore;
+import io.vertx.ext.web.sstore.SessionStore;
 
 /**
  * Author: SACHIN
@@ -47,6 +51,16 @@ public class VChat extends AbstractVerticle{
         router.route("/loginUrl/*").handler(sockJSHandler);
         router.route("/userInfo/*").handler(sockJSHandler);
         router.route("/result/*").handler(this::resultCallback);
+        router = Router.router(vertx);
+
+        router.route().handler(CookieHandler.create());
+        SessionStore store = LocalSessionStore.create(vertx);
+        SessionHandler sessionHandler = SessionHandler.create(store);
+
+
+        router.route().handler(sessionHandler);
+
+
         loginListner();
         userInfo();
     }
@@ -72,8 +86,30 @@ public class VChat extends AbstractVerticle{
         });
     }
     public void resultCallback(RoutingContext routingContext){
-        System.out.println("Calling");
         String verifier = routingContext.request().getParam("oauth_verifier");
+//        System.out.println(verifier);
+
+        Session session = routingContext.session();
+
+        System.out.println("test");
+        //put some data from the session
+        session.put("username", "admin");
+        session.put("pass","password");
+
+        //retrive some data from session
+        String usr = session.get("username");
+        String pass = session.get("pass");
+
+        System.out.println("Username is "+usr +" password is "+ pass);
+
+        HttpServerResponse response = routingContext.response();
+        response.setChunked(true);
+        JsonObject object = new JsonObject();
+        object.put("username",usr);
+        object.put("password",pass);
+        response.write(object.toString());
+
+
 
 
     }
