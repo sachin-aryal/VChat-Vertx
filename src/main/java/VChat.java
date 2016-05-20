@@ -110,6 +110,5 @@ public class VChat extends AbstractVerticle{
         response.write(object.toString());
 
 
-
     }
 }
