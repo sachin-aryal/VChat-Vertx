@@ -1,7 +1,10 @@
+package org.vchat.controller;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
@@ -20,6 +23,7 @@ public class VChat extends AbstractVerticle{
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(new VChat());
+
     }
 
     public void start() {
@@ -38,43 +42,54 @@ public class VChat extends AbstractVerticle{
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx);
         BridgeOptions options = new BridgeOptions();
         options.addInboundPermitted(new PermittedOptions().setAddress("chat.to.server"));
-        options.addInboundPermitted(new PermittedOptions().setAddress("chat.to.server.userInfo"));
         options.addOutboundPermitted(new PermittedOptions().setAddress("chat.to.client"));
-        options.addOutboundPermitted(new PermittedOptions().setAddress("chat.to.client.userInfo"));
         sockJSHandler.bridge(options);
 
 
-        router.route("/loginUrl/*").handler(sockJSHandler);
-        router.route("/userInfo/*").handler(sockJSHandler);
+        router.route("/clientController/*").handler(sockJSHandler);
         router.route("/result/*").handler(this::resultCallback);
-        loginListner();
-        userInfo();
+        router.route("/logout/*").handler(this::logoutUser);
+        eventBusListener();
     }
 
-    public void loginListner(){
+    public void eventBusListener(){
 
         EventBus eb = vertx.eventBus();
 
         eb.consumer("chat.to.server",message->{
 
-            vertx.executeBlocking(future -> {
-                future.complete(OAuth.getAuthorizationUrl());
-            }, res -> {
-                eb.publish("chat.to.client",res.result());
-            });
+            JsonObject data = (JsonObject) message.body();
+            String classifier = data.getString("classifier");
+            if(classifier.equals("loginUri")) {
+                vertx.executeBlocking(future -> {
+                    future.complete(OAuth.getOAuthParam());
+                }, res -> {
+                    eb.publish("chat.to.client", res.result());
+                });
+            }else if(classifier.equals("fetchMessage")){
+
+            }else if(classifier.equals("sendMessage")){
+
+            }else if(classifier.equals("sendFriendRequest")){
+
+            }else if(classifier.equals("acceptRequest")){
+
+            }else if(classifier.equals("rejectRequest")){
+
+            }
         });
 
-    }
-    public void userInfo(){
-        EventBus eb = vertx.eventBus();
-        eb.consumer("chat.to.server.userInfo",data->{
-
-        });
     }
     public void resultCallback(RoutingContext routingContext){
-        System.out.println("Calling");
-        String verifier = routingContext.request().getParam("oauth_verifier");
+        System.out.println("Callback Result");
+        /*String verifier = routingContext.request().getParam("oauth_verifier");*/
+        routingContext.response().setChunked(true);
+        routingContext.response().sendFile("webroot/dashboard.html");
 
+    }
 
+    public void logoutUser(RoutingContext routingContext){
+
+        System.out.println("Logging Out the User");
     }
 }

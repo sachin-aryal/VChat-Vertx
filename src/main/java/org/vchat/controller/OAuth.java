@@ -1,3 +1,5 @@
+package org.vchat.controller;
+
 import io.vertx.core.json.JsonObject;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -10,7 +12,7 @@ public class OAuth {
     private final static String consumerKey = "8n4Fm4FVUX289HbhwIavKV59V";
     private final static String consumerSecret = "vVkl6RfKPEgsff3Kz8SngDOaQ9gDfmnyk93EPwwmpJJgffhrOw";
 
-    public static JsonObject getAuthorizationUrl() {
+    public static JsonObject getOAuthParam() {
         Twitter twitter = TwitterFactory.getSingleton();
         String returnUrl = "http://localhost:8080/result";
         twitter.setOAuthConsumer(consumerKey, consumerSecret);
