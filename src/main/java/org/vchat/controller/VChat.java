@@ -7,13 +7,13 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.Session;
-import io.vertx.ext.web.handler.*;
+import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
-import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.sstore.SessionStore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: SACHIN
@@ -51,25 +51,71 @@ public class VChat extends AbstractVerticle{
 
         router.route("/clientController/*").handler(sockJSHandler);
         router.route("/result/*").handler(this::resultCallback);
-        router.route("/logout/*").handler(this::logoutUser);
-        eventBusListener();
+        router.route("/dashboard/*").handler(rtx->{
+            System.out.println("Redirected from script");
+            rtx.response().setChunked(true);
+            rtx.response().sendFile("webroot/chat.html");
+        });
+        loginListner();
     }
 
-    public void eventBusListener(){
+    public void loginListner(){
 
         EventBus eb = vertx.eventBus();
 
         eb.consumer("chat.to.server",message->{
-
+            System.out.println("Getting Request in Client Controller Event Bus");
             JsonObject data = (JsonObject) message.body();
             String classifier = data.getString("classifier");
+
             if(classifier.equals("loginUri")) {
+                System.out.println("Request for Login URI");
                 vertx.executeBlocking(future -> {
                     future.complete(OAuth.getOAuthParam());
                 }, res -> {
                     eb.publish("chat.to.client", res.result());
                 });
-            }else if(classifier.equals("fetchMessage")){
+
+            }else if(classifier.equals("getUserInfo")){
+                System.out.println("Getting Request for User Info");
+                vertx.executeBlocking(future -> {
+                    future.complete(OAuth.getUserInfo(data.getString("tokenKey"),data.getString("tokenKeySecret"),
+                            data.getString("verifier")));
+                }, res -> {
+                    eb.publish("chat.to.client", res.result());
+                });
+            }else if(classifier.equals("fetchFriendList")){
+                System.out.println("Fetching Friend List");
+                vertx.executeBlocking(future -> {
+                    JsonObject object = new JsonObject();
+                    object.put("sgiri","Sagar Giri");
+                    object.put("ssharma","Sandesh Sharma");
+                    object.put("smainali","Sanjeev Mainali");
+                    object.put("classifier","fetchFriendList");
+                    future.complete(object);
+                }, res -> {
+                    eb.publish("chat.to.client", res.result());
+                });
+            }
+            else if(classifier.equals("fetchMessage")){
+                vertx.executeBlocking(future -> {
+                    JsonObject object = new JsonObject();
+                    String myId = data.getString("myId");
+                    String friendId = data.getString("friendId");
+                    object.put("myId", myId);
+                    object.put("friendId", friendId);
+                    List<String> messageList = new ArrayList<>();
+                    messageList.add(myId + ": Hello");
+                    messageList.add(friendId + ": Hi");
+                    messageList.add(friendId + ": K Cha");
+                    messageList.add(myId + ": Sab thik cha");
+                    object.put("message", messageList);
+                    object.put("classifier","fetchMessage");
+                    future.complete(object);
+                },res->{
+                    System.out.println("Fetching Message from Server");
+                    eb.publish("chat.to.client", res.result());
+                });
 
             }else if(classifier.equals("sendMessage")){
 
@@ -85,10 +131,19 @@ public class VChat extends AbstractVerticle{
     }
     public void resultCallback(RoutingContext routingContext){
         System.out.println("Callback Result");
-        /*String verifier = routingContext.request().getParam("oauth_verifier");*/
-        routingContext.response().setChunked(true);
-        routingContext.response().sendFile("webroot/dashboard.html");
-
+        String verifier = routingContext.request().getParam("oauth_verifier");
+        StringBuilder script = new StringBuilder();
+        script.append("<script src=\"https://code.jquery.com/jquery-1.11.2.min.js\"></script>");
+        script.append("<script type='text/javascript'>");
+        script.append("$(function(){");
+        script.append("localStorage.setItem('verifier','").append(verifier).append("');");
+        script.append("window.location.href=").append("'http://localhost:8080/dashboard'");
+        script.append("});");
+        script.append("</script>");
+        routingContext.response().putHeader("content-length",String.valueOf(script.toString().length()));
+        routingContext.response().putHeader("content-type","text/html");
+        routingContext.response().write(script.toString());
+        routingContext.response().end();
     }
 
     public void logoutUser(RoutingContext routingContext){
