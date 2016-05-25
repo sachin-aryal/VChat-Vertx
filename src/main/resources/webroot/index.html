@@ -9,15 +9,13 @@
     <script type="text/javascript">
 
         var eb = new EventBus("/clientController/");
-        var signinWin;
+
         eb.onopen = function () {
             eb.registerHandler("chat.to.client", function (err, msg) {
                 var parsedData = msg.body;
-//                localStorage.setItem("tokenKey",parsedData.tokenKey);
-//                localStorage.setItem("tokenKeySecret",parsedData.tokenKeySecret);
+                localStorage.setItem("tokenKey",parsedData.tokenKey);
+                localStorage.setItem("tokenKeySecret",parsedData.tokenKeySecret);
                 window.location.href= parsedData.authorizationUrl;
-//                signinWin = window.open(parsedData.authorizationUrl, "SignIn", "width=780,height=410,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0,left=" + 500 + ",top=" + 500);
-//                signinWin.focus();
                 return false;
             });
         };
@@ -30,7 +28,5 @@
 </head>
 <body>
     <button onclick="sendMes()">Login with Twitter</button>
-
-    </iframe>
 </body>
 </html>

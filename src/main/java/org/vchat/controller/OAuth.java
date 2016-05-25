@@ -37,11 +37,11 @@ public class OAuth {
         return jsonObject;
     }
 
-    public static User oResult(String tokenKeyGen,String tokenSecretKeyGen,String verifier) {
+    public static JsonObject getUserInfo(String tokenKeyGen,String tokenSecretKeyGen,String verifier) {
         System.out.println("Redirecting to the logged in url");
 
         Twitter twitter = new TwitterFactory().getInstance();
-
+        JsonObject userInfo = new JsonObject();
         twitter.setOAuthConsumer(consumerKey, consumerSecret);
 //        String verifier = routingContext.request().getParam("oauth_verifier");
         RequestToken requestToken = new RequestToken(tokenKeyGen, tokenSecretKeyGen);
@@ -51,11 +51,13 @@ public class OAuth {
             accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
             twitter.setOAuthAccessToken(accessToken);
             user = twitter.verifyCredentials();
-
+            userInfo.put("name",user.getName());
+            userInfo.put("screenName",user.getScreenName());
+            userInfo.put("classifier","getUserInfo");
         } catch (TwitterException e) {
             e.printStackTrace();
         }
-        return user;
+        return userInfo;
     }
 }
 

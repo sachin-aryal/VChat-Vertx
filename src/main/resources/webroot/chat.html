@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <title>VChat</title>
+        <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+        <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+        <script src="Js/event/vertx-eventbus.js"></script>
+        <script src="Js/event/chatBox.js"></script>
+        <link href="Css/chatBox.css" rel="stylesheet"/>
+
+        <script type="text/javascript">
+            var eb = new EventBus("/clientController/");
+            eb.onopen = function () {
+                console.log("Event bus is open");
+                getUserInfo();
+                eb.registerHandler("chat.to.client", function (err, msg) {
+                    var parsedData = msg.body;
+                    if(parsedData.classifier=="getUserInfo"){
+                        $("#userInfo").text("Welcome "+parsedData.name);
+                        fetchFriendList(parsedData.screenName)
+                    }
+                    return false;
+                });
+            };
+
+            function getUserInfo() {
+                console.log("Sending Message");
+                var tokenKey = localStorage.getItem("tokenKey");
+                var tokenKeySecret = localStorage.getItem("tokenKeySecret");
+                var verifier = localStorage.getItem("verifier");
+                eb.publish("chat.to.server", {classifier:"getUserInfo",tokenKey:tokenKey,
+                    tokenKeySecret:tokenKeySecret,verifier:verifier});
+            }
+        </script>
+
+    </head>
+    <body>
+    <div id="currentUser">
+        <h1 id="userInfo"></h1>
+    </div>
+        <div class="chat-sidebar">
+            <!--<div class="sidebar-name">
+                &lt;!&ndash; Pass username and display name to register popup &ndash;&gt;
+                <a href="javascript:register_popup('narayan-prusty', 'Narayan Prusty');" id="popUpOpener">
+                    <img width="30" height="30" src="Sachin_Aryal.jpg" />
+                    <span id="displayName">Narayan Prusty</span>
+                </a>
+            </div>-->
+        </div>
+        
+    </body>
+</html>
