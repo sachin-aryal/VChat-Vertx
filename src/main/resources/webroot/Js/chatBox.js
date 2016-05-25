@@ -143,16 +143,19 @@ window.addEventListener("load", calculate_popups);
 function passMessageToServer(sender,receiver,message){
     var messageBox = $("#"+receiver).find(".popup-messages");
     var messageSpan = $('<span style="margin-left: 3%" class="mes">'+message+'</span><br/>');
-    messageSpan.appendTo(messageBox.find("#messageListDiv").after(messageBox.find("span").lastChild));
-    var heightTop = messageBox[0].scrollHeight;
-    messageBox.scrollTop(heightTop);
+    messageSpan.appendTo(messageBox.find("#messageListDiv").before(messageBox.find("#messageListDiv").find("span").firstChild));
+    //var heightTop = messageBox[0].scrollHeight;
+    //messageBox.scrollTop(heightTop);
 
 }
 
 
-
-
 function fetchMessage(myId,friendId){
+
+    eb.publish("chat.to.server", {classifier:"fetchMessage",myId:myId,friendId:friendId});
+}
+
+function showMessage(friendId,message){
     var message = $("#"+friendId).find(".popup-messages");
     var messageList = $("<div id='messageListDiv'></div>");
     for(var i=0;i<100;i++){
@@ -163,6 +166,3 @@ function fetchMessage(myId,friendId){
 }
 
 
-function fetchFriendList(userName){
-
-}

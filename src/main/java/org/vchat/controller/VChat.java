@@ -12,6 +12,9 @@ import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Author: SACHIN
  * Date: 5/6/2016.
@@ -81,8 +84,38 @@ public class VChat extends AbstractVerticle{
                 }, res -> {
                     eb.publish("chat.to.client", res.result());
                 });
+            }else if(classifier.equals("fetchFriendList")){
+                System.out.println("Fetching Friend List");
+                vertx.executeBlocking(future -> {
+                    JsonObject object = new JsonObject();
+                    object.put("sgiri","Sagar Giri");
+                    object.put("ssharma","Sandesh Sharma");
+                    object.put("smainali","Sanjeev Mainali");
+                    object.put("classifier","fetchFriendList");
+                    future.complete(object);
+                }, res -> {
+                    eb.publish("chat.to.client", res.result());
+                });
             }
             else if(classifier.equals("fetchMessage")){
+                vertx.executeBlocking(future -> {
+                    JsonObject object = new JsonObject();
+                    String myId = data.getString("myId");
+                    String friendId = data.getString("friendId");
+                    object.put("myId", myId);
+                    object.put("friendId", friendId);
+                    List<String> messageList = new ArrayList<>();
+                    messageList.add(myId + ": Hello");
+                    messageList.add(friendId + ": Hi");
+                    messageList.add(friendId + ": K Cha");
+                    messageList.add(myId + ": Sab thik cha");
+                    object.put("message", messageList);
+                    object.put("classifier","fetchMessage");
+                    future.complete(object);
+                },res->{
+                    System.out.println("Fetching Message from Server");
+                    eb.publish("chat.to.client", res.result());
+                });
 
             }else if(classifier.equals("sendMessage")){
 
