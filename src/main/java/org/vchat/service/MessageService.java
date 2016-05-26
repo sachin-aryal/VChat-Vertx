@@ -114,9 +114,9 @@ public class MessageService {
                                             for(JsonArray row : allRow){
                                                 int sendId = row.getInteger(1);
                                                 if(sendId==sender[0]){
-                                                    messageList.add(myId+": "+row.getString(3));
+                                                    messageList.add(myId+"userSpliter"+row.getString(3)+"textForSplit"+row.getString(4));
                                                 }else{
-                                                    messageList.add(friendId+": "+row.getString(3));
+                                                    messageList.add(friendId+"userSpliter"+row.getString(3)+"textForSplit"+row.getString(4));
                                                 }
                                                 if(allMessageSet.getNumRows()== index[0]){
                                                     connection.close(connectionCloser->{

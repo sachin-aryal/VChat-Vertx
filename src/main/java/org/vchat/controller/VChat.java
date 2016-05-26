@@ -46,6 +46,7 @@ public class VChat extends AbstractVerticle{
 
         router.route("/Js/*").handler(StaticHandler.create("webroot/Js"));
         router.route("/Css/*").handler(StaticHandler.create("webroot/Css"));
+        router.route("/images/*").handler(StaticHandler.create("webroot/images"));
 
 
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx);

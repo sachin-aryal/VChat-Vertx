@@ -151,7 +151,6 @@ function fetchMessage(myId,friendId){
 
 function showMessage(friendId,message){
     var messageBox = $("#"+friendId).find(".popup-messages");
-
     if(messageBox.find("#messageListDiv").length>0){
         messageBox.find("#messageListDiv").remove();
     }
@@ -159,20 +158,31 @@ function showMessage(friendId,message){
     var messageList = $("<div id='messageListDiv'></div>");
 
     for(var i=0;i<message.length;i++){
-        var messageSpan = $('<span style="margin-left: 3%" class="'+i+'">'+message[i]+'</span><br/>');
+        var splittedMessage = message[i].split("textForSplit");
+        var dateOfMessage = $('<p style="text-align: center;color: #dfece7">'+splittedMessage[1]+'</p>');
+        var actualMessage = splittedMessage[0].split("userSpliter");
+        var messageSpan = $('<span style="margin-left: 3%" class="'+i+'">'+actualMessage[1]+'</span><br/><br/>');
+        if(splittedMessage[0].indexOf(friendId)<0){
+            messageSpan.css("float","right");
+            messageSpan.css("margin-right","6px");
+            messageSpan.css("background","#E0EDFF none repeat scroll 0 0");
+        }else{
+            messageSpan.css("background","#FEFEFE none repeat scroll 0 0");
+        }
+        messageSpan.css("border","1px solid #dfece7");
+        messageSpan.css("border-radius","2px");
+        messageSpan.css("color","#1f2121");
+        messageSpan.css("padding","5px 10px");
+        dateOfMessage.appendTo(messageList);
         messageSpan.appendTo(messageList);
     }
 
     messageBox.prepend(messageList);
-    /*if(messageList.children().length<10){
-        var noOfSpan = messageList.children().length;
-        if(noOfSpan==0){
-            noOfSpan=1;
-        }
-        $("#sendMessageDiv").css("margin-top",(275/noOfSpan)+"px")
-    }*/
-    var heightTop = messageBox[0].scrollHeight;
-    messageBox.scrollTop(heightTop);
+    if(message.length>8){
+        var heightTop = messageBox[0].scrollHeight;
+        messageBox.scrollTop(heightTop);
+    }
+
 }
 
 
