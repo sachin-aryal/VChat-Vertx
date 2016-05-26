@@ -97,8 +97,6 @@ public class MessageService {
                                 if (friendIdResult.getNumRows() > 0) {
                                     receiver[0] = friendIdResult.getResults().get(0).getInteger(0);
 
-                                    System.out.println("Sender Id is "+sender[0]);
-                                    System.out.println("Receiver Id is "+receiver[0]);
 
                                     String getAllMessage = "select *from chat where (sender="+sender[0]+" and" +
                                             " receiver="+receiver[0]+") or (sender="+receiver[0]+" and receiver="+sender[0]+")";

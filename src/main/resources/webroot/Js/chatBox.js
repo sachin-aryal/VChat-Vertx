@@ -164,11 +164,13 @@ function showMessage(friendId,message){
     }
 
     messageBox.prepend(messageList);
-    if(messageList.children().length<10){
+    /*if(messageList.children().length<10){
         var noOfSpan = messageList.children().length;
-        console.log(noOfSpan);
-        $("#sendMessageDiv").css("margin-top",(696/noOfSpan)+"px")
-    }
+        if(noOfSpan==0){
+            noOfSpan=1;
+        }
+        $("#sendMessageDiv").css("margin-top",(275/noOfSpan)+"px")
+    }*/
     var heightTop = messageBox[0].scrollHeight;
     messageBox.scrollTop(heightTop);
 }

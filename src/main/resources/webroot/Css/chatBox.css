@@ -107,3 +107,7 @@ body
     height: 85%;
     overflow-y: scroll;
 }
+
+#sendMessageDiv{
+    margin-top: 75px;
+}

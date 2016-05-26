@@ -15,7 +15,7 @@
             getUserInfo();
             eb.registerHandler("chat.to.client", function (err, msg) {
                 var parsedData = msg.body;
-                console.log(parsedData);
+//                console.log(parsedData);
                 if(parsedData.classifier=="getUserInfo"){
                     localStorage.setItem("userName",parsedData.screenName);
                     localStorage.setItem("name",parsedData.name);
@@ -37,7 +37,6 @@
         };
 
         function getUserInfo() {
-            console.log("Sending Message");
             var tokenKey = localStorage.getItem("tokenKey");
             var tokenKeySecret = localStorage.getItem("tokenKeySecret");
             var verifier = localStorage.getItem("verifier");
@@ -90,7 +89,7 @@
                 for(var i=0;i<idArray.length;i++){
                     fetchMessage(myId,idArray[i])
                 }
-            },10000);
+            },7000);
 
         }
 
