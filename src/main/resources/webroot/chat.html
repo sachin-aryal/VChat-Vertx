@@ -1,81 +1,109 @@
 <!doctype html>
 <html>
-    <head>
-        <title>VChat</title>
-        <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-        <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
-        <script src="Js/vertx-eventbus.js"></script>
-        <script src="Js/chatBox.js"></script>
-        <link href="Css/chatBox.css" rel="stylesheet"/>
+<head>
+    <title>VChat</title>
+    <script src="Js/jquery-1.11.2.min.js"></script>
+    <script src="Js/sockJs.min.js"></script>
+    <script src="Js/vertx-eventbus.js"></script>
+    <script src="Js/chatBox.js"></script>
+    <link href="Css/chatBox.css" rel="stylesheet"/>
 
-        <script type="text/javascript">
-            var eb = new EventBus("/clientController/");
-            eb.onopen = function () {
-                console.log("Event bus is open");
-//                getUserInfo();
-                fetchFriendList("Sachin");
-                eb.registerHandler("chat.to.client", function (err, msg) {
-                    var parsedData = msg.body;
-                    if(parsedData.classifier=="getUserInfo"){
-                        localStorage.setItem("userName",parsedData.screenName);
-                        localStorage.setItem("name",parsedData.name);
-                        $("#userInfo").text("Welcome "+parsedData.name);
-                        fetchFriendList(parsedData.screenName)
-                    }
-                    else if(parsedData.classifier=="fetchFriendList"){
-                        showFriendList(parsedData)
-                    }
-                    else if(parsedData.classifier=="fetchMessage"){
-                        var friendId = parsedData.friendId;
-                        var message = parsedData.message;
-                        showMessage(friendId,message);
-                    }
+    <script type="text/javascript">
+        var eb = new EventBus("/clientController/");
+        eb.onopen = function () {
+            console.log("Event bus is open");
+            getUserInfo();
+            eb.registerHandler("chat.to.client", function (err, msg) {
+                var parsedData = msg.body;
+                console.log(parsedData);
+                if(parsedData.classifier=="getUserInfo"){
+                    localStorage.setItem("userName",parsedData.screenName);
+                    localStorage.setItem("name",parsedData.name);
+                    $("#userInfo").text("Welcome "+parsedData.name);
+                    eb.publish("chat.to.server", {classifier:"fetchFriendList",whom:userName});
+                    fetchFriendList(parsedData.screenName);
+                    messageFetcher();
+                }
+                else if(parsedData.classifier=="fetchFriendList"){
+                    showFriendList(parsedData)
+                }
+                else if(parsedData.classifier=="fetchMessage"){
+                    var friendId = parsedData.friendId;
+                    var message = parsedData.message;
+                    showMessage(friendId,message);
+                }
+                return false;
+            });
+        };
 
-                    return false;
-                });
-            };
-
-            function getUserInfo() {
-                console.log("Sending Message");
-                var tokenKey = localStorage.getItem("tokenKey");
-                var tokenKeySecret = localStorage.getItem("tokenKeySecret");
-                var verifier = localStorage.getItem("verifier");
+        function getUserInfo() {
+            console.log("Sending Message");
+            var tokenKey = localStorage.getItem("tokenKey");
+            var tokenKeySecret = localStorage.getItem("tokenKeySecret");
+            var verifier = localStorage.getItem("verifier");
+            var name = localStorage.getItem("name");
+            var userName = localStorage.getItem("userName");
+            if(name!=null){
+                $("#userInfo").text("Welcome "+name);
+                eb.publish("chat.to.server", {classifier:"fetchFriendList",whom:userName});
+                fetchFriendList(userName);
+                messageFetcher();
+            }else{
                 eb.publish("chat.to.server", {classifier:"getUserInfo",tokenKey:tokenKey,
                     tokenKeySecret:tokenKeySecret,verifier:verifier});
             }
+        }
 
-            function fetchFriendList(userName){
-                eb.publish("chat.to.server", {classifier:"fetchFriendList",whom:userName});
+        function fetchFriendList(userName){
+            setInterval(function(){
+                eb.publish("chat.to.server", {classifier:"fetchFriendList",whom:userName})
+            },15000);
+        }
+
+        function showFriendList(friends){
+            var mainDiv = $(".chat-sidebar");
+            if(mainDiv.children().length>0){
+                mainDiv.empty();
             }
-
-
-            function showFriendList(friends){
-                for(var name in friends){
-                    var mainDiv = $(".chat-sidebar");
-                    if(name!="classifier"){
-                        var value = friends[name];
-                        var innerDiv = $("<div class='sidebar-name' id='"+name+"-sidebar'>");
-                        var aTag = $('<a id="popUpOpener-'+name+'"></a>');
-                        aTag.attr("href",'javascript:register_popup("'+name+'","'+value+'")');
-                        aTag.append('<img width="30" height="30" src="Sachin_Aryal.jpg" />');
-                        aTag.append('<span id="displayName">'+value+'</span>');
-                        innerDiv.append(aTag);
-                        innerDiv.append('</div>');
-                        mainDiv.append(innerDiv);
-                    }
+            for(var name in friends){
+                if(name!="classifier"){
+                    var value = friends[name];
+                    var innerDiv = $("<div class='sidebar-name' id='"+name+"-sidebar'>");
+                    var aTag = $('<a id="popUpOpener-'+name+'"></a>');
+                    aTag.attr("href",'javascript:register_popup("'+name+'","'+value+'")');
+                    aTag.append('<img width="30" height="30" src="Sachin_Aryal.jpg" />');
+                    aTag.append('<span id="displayName">'+value+'</span>');
+                    innerDiv.append(aTag);
+                    innerDiv.append('</div>');
+                    mainDiv.append(innerDiv);
                 }
             }
+        }
 
-        </script>
+        function messageFetcher(){
+            setInterval(function(){
+                var idArray = [];
+                $('.chat-popup').each(function () {
+                    idArray.push(this.id);
+                });
+                var myId = localStorage.getItem("userName");
+                for(var i=0;i<idArray.length;i++){
+                    fetchMessage(myId,idArray[i])
+                }
+            },10000);
 
-    </head>
-    <body>
-    <div id="currentUser">
-        <h1 id="userInfo"></h1>
-    </div>
-        <div class="chat-sidebar">
+        }
 
-        </div>
-        
-    </body>
+    </script>
+
+</head>
+<body>
+<div id="currentUser">
+    <h1 id="userInfo"></h1>
+</div>
+<div class="chat-sidebar">
+
+</div>
+
+</body>
 </html>

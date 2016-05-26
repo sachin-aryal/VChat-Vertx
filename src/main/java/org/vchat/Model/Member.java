@@ -9,6 +9,16 @@ public class Member {
     private String userName;
     private String status;
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    private int userId;
+
     public Member(String userName, String status) {
         this.userName = userName;
         this.status = status;

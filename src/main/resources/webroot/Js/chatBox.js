@@ -89,11 +89,11 @@ function register_popup(id, name)
     document.getElementsByTagName("body")[0].innerHTML = document.getElementsByTagName("body")[0].innerHTML + element;
 
     var message = $("#"+id).find(".popup-messages");
-    fetchMessage("myId",id);
+    var myId=localStorage.getItem("userName");
+    fetchMessage(myId,id);
     var messageDiv = $("<div id='sendMessageDiv'></div>");
     var messageText = $('<textarea rows="3" cols="26" name="'+id+'" id="sendMessageBox" style="margin-top: 15px;margin-left: 3%"></textarea>');
     messageDiv.append(messageText);
-    var myId="My Id";
     var sendButton = $("<button style='margin-left: 6%' class='sendMessageButton'>Send</button>");
     sendButton.attr("onClick","sendMessage('"+myId+"','"+id+"')");
 
@@ -141,28 +141,36 @@ window.addEventListener("load", calculate_popups);
 
 
 function passMessageToServer(sender,receiver,message){
-    var messageBox = $("#"+receiver).find(".popup-messages");
-    var messageSpan = $('<span style="margin-left: 3%" class="mes">'+message+'</span><br/>');
-    messageSpan.appendTo(messageBox.find("#messageListDiv").before(messageBox.find("#messageListDiv").find("span").firstChild));
-    //var heightTop = messageBox[0].scrollHeight;
-    //messageBox.scrollTop(heightTop);
-
+    eb.publish("chat.to.server", {classifier:"sendMessage",myId:sender,friendId:receiver,message:message});
 }
 
 
 function fetchMessage(myId,friendId){
-
     eb.publish("chat.to.server", {classifier:"fetchMessage",myId:myId,friendId:friendId});
 }
 
 function showMessage(friendId,message){
-    var message = $("#"+friendId).find(".popup-messages");
+    var messageBox = $("#"+friendId).find(".popup-messages");
+
+    if(messageBox.find("#messageListDiv").length>0){
+        messageBox.find("#messageListDiv").remove();
+    }
+
     var messageList = $("<div id='messageListDiv'></div>");
-    for(var i=0;i<100;i++){
-        var messageSpan = $('<span style="margin-left: 3%" class="'+i+'">'+i+'</span><br/>');
+
+    for(var i=0;i<message.length;i++){
+        var messageSpan = $('<span style="margin-left: 3%" class="'+i+'">'+message[i]+'</span><br/>');
         messageSpan.appendTo(messageList);
     }
-    message.append(messageList);
+
+    messageBox.prepend(messageList);
+    if(messageList.children().length<10){
+        var noOfSpan = messageList.children().length;
+        console.log(noOfSpan);
+        $("#sendMessageDiv").css("margin-top",(696/noOfSpan)+"px")
+    }
+    var heightTop = messageBox[0].scrollHeight;
+    messageBox.scrollTop(heightTop);
 }
 
 

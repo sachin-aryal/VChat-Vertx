@@ -11,9 +11,10 @@ import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.vchat.service.DbService;
+import org.vchat.service.FriendService;
+import org.vchat.service.MessageService;
+import org.vchat.service.UserService;
 
 /**
  * Author: SACHIN
@@ -32,6 +33,11 @@ public class VChat extends AbstractVerticle{
     public void start() {
         Router router = Router.router(vertx);
         vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+        vertx.executeBlocking(future->{
+            DbService.buildConnection(vertx);
+            future.complete("Connected to Database");
+        },res->{});
+
         router.route("/").handler(rtx -> {
             HttpServerResponse response = rtx.response();
             response.setChunked(true);
@@ -73,52 +79,30 @@ public class VChat extends AbstractVerticle{
                 vertx.executeBlocking(future -> {
                     future.complete(OAuth.getOAuthParam());
                 }, res -> {
+                    System.out.println("Returned Return URI is "+res.result());
                     eb.publish("chat.to.client", res.result());
                 });
 
             }else if(classifier.equals("getUserInfo")){
                 System.out.println("Getting Request for User Info");
                 vertx.executeBlocking(future -> {
-                    future.complete(OAuth.getUserInfo(data.getString("tokenKey"),data.getString("tokenKeySecret"),
-                            data.getString("verifier")));
+                    JsonObject userInfo = OAuth.getUserInfo(data.getString("tokenKey"),data.getString("tokenKeySecret"),data.getString("verifier"));
+                    UserService.registerUser(userInfo.getString("name"),userInfo.getString("screenName"));
+                    future.complete(userInfo);
                 }, res -> {
+                    System.out.println("Returning User Info is "+res.result());
                     eb.publish("chat.to.client", res.result());
                 });
             }else if(classifier.equals("fetchFriendList")){
                 System.out.println("Fetching Friend List");
-                vertx.executeBlocking(future -> {
-                    JsonObject object = new JsonObject();
-                    object.put("sgiri","Sagar Giri");
-                    object.put("ssharma","Sandesh Sharma");
-                    object.put("smainali","Sanjeev Mainali");
-                    object.put("classifier","fetchFriendList");
-                    future.complete(object);
-                }, res -> {
-                    eb.publish("chat.to.client", res.result());
-                });
+                FriendService.getFriendList(data.getString("whom"),vertx);
             }
-            else if(classifier.equals("fetchMessage")){
-                vertx.executeBlocking(future -> {
-                    JsonObject object = new JsonObject();
-                    String myId = data.getString("myId");
-                    String friendId = data.getString("friendId");
-                    object.put("myId", myId);
-                    object.put("friendId", friendId);
-                    List<String> messageList = new ArrayList<>();
-                    messageList.add(myId + ": Hello");
-                    messageList.add(friendId + ": Hi");
-                    messageList.add(friendId + ": K Cha");
-                    messageList.add(myId + ": Sab thik cha");
-                    object.put("message", messageList);
-                    object.put("classifier","fetchMessage");
-                    future.complete(object);
-                },res->{
-                    System.out.println("Fetching Message from Server");
-                    eb.publish("chat.to.client", res.result());
-                });
-
+            else if(classifier.equals("fetchMessage")) {
+                System.out.println("Call for fetching Message");
+                MessageService.sendMessageToClient(data, vertx);
             }else if(classifier.equals("sendMessage")){
-
+                System.out.println("Storing Message To the Database");
+                MessageService.saveMessage(data,vertx);
             }else if(classifier.equals("sendFriendRequest")){
 
             }else if(classifier.equals("acceptRequest")){
