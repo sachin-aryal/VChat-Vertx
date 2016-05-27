@@ -58,6 +58,7 @@ public class VChat extends AbstractVerticle{
 
         router.route("/clientController/*").handler(sockJSHandler);
         router.route("/result/*").handler(this::resultCallback);
+        router.route("/logout/*").handler(this::logoutUser);
         router.route("/dashboard/*").handler(rtx->{
             System.out.println("Redirected from script");
             rtx.response().setChunked(true);
@@ -134,5 +135,7 @@ public class VChat extends AbstractVerticle{
     public void logoutUser(RoutingContext routingContext){
 
         System.out.println("Logging Out the User");
+        routingContext.response().setChunked(true);
+        routingContext.response().sendFile("webroot/index.html");
     }
 }

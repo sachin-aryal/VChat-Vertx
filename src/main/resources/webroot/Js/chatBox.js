@@ -175,6 +175,9 @@ function showMessage(friendId,message){
         messageSpan.css("padding","5px 10px");
         dateOfMessage.appendTo(messageList);
         messageSpan.appendTo(messageList);
+        if(message.length<2){
+            messageList.css("height","45%");
+        }
     }
 
     messageBox.prepend(messageList);
