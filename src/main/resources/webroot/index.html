@@ -21,7 +21,8 @@
         };
 
         $(function(){
-            if(localStorage.getItem("userName")!=null){
+            var uName = localStorage.getItem("userName");
+                if(uName!=null && uName!=""){
                 window.location.href="http://localhost:8080/dashboard"
             }
         });
