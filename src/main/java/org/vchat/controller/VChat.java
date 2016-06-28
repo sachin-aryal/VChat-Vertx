@@ -105,8 +105,9 @@ public class VChat extends AbstractVerticle{
             }else if(classifier.equals("sendMessage")){
                 System.out.println("Storing Message To the Database");
                 MessageService.saveMessage(data,vertx);
-            }else if(classifier.equals("sendFriendRequest")){
-
+            }else if(classifier.equals("addFriend")){
+                System.out.println("Add Friend Request from User");
+                FriendService.addFriend(data,vertx);
             }else if(classifier.equals("acceptRequest")){
 
             }else if(classifier.equals("rejectRequest")){

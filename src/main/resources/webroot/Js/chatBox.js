@@ -188,4 +188,3 @@ function showMessage(friendId,message){
 
 }
 
-

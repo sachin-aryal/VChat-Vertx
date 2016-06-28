@@ -21,7 +21,7 @@ public class DbService {
                 .put("url", "jdbc:mysql://localhost:3306/vchat")
                 .put("driver_class", "com.mysql.jdbc.Driver")
                 .put("user", "root")
-                .put("password", "")
+                .put("password", "root")
                 .put("max_pool_size", 10)
 
         );

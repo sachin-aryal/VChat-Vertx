@@ -1,5 +1,6 @@
 package org.vchat.service;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -89,4 +90,11 @@ public class FriendService {
         });
     }
 
+
+    public static void addFriend(JsonObject data,Vertx vertx){
+        String myId = data.getString("myId");
+        String friendId = data.getString("friendId");
+
+
+    }
 }

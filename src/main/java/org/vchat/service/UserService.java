@@ -1,5 +1,6 @@
 package org.vchat.service;
 
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -55,7 +56,7 @@ public class UserService {
 
     }
 
-    public static void getMemberId(Member member){
+    public static Future<String> getMemberId(Member member){
         DbService.getClient().getConnection(conn->{
             if(conn.failed()){
                 logger.error("Failed Connection to database");
@@ -66,6 +67,7 @@ public class UserService {
                     if(resultSet.getNumRows()>0) {
                         int uId = resultSet.getResults().get(0).getInteger(0);
                         member.setUserId(uId);
+                        System.out.println("Complete........");
                         DbService.closeConnection(connection);
                     }else{
                         DbService.closeConnection(connection);
@@ -74,6 +76,8 @@ public class UserService {
             }
 
         });
+        System.out.println("Returning the Value");
+        return null;
     }
 
 
