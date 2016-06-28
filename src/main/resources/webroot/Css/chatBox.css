@@ -14,6 +14,7 @@
 body
 {
     background-color: #e9eaed;
+    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
 }
 
 .chat-sidebar
@@ -113,4 +114,8 @@ body
 }
 .popup-messages{
     background: #3f9684 none repeat scroll
+}
+.buttons{
+    margin: 0 auto;
+    width:20%;
 }

@@ -113,33 +113,35 @@
 
 </head>
 <body>
-<div id="currentUser">
-    <h1 id="userInfo"></h1>
-</div>
-<button onclick="logout()">Logout</button>
-<button data-toggle="modal" data-target="#addFriend">Add Friend</button>
+<div class="container">
+    <div id="currentUser">
+        <h1 id="userInfo" class="text-success text-center"></h1>
+    </div>
+    <div class="buttons">
+        <button class="btn btn-success" data-toggle="modal" data-target="#addFriend">Add Friend</button>
+        <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <div class="chat-sidebar">
 
-<div class="chat-sidebar">
-
-</div>
+    </div>
 
 
-<div id="addFriend" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Add Friend</h4>
-            </div>
-            <div class="modal-body">
-                <label for="friendId">Username</label>
-                <input type="text" name="friendId" id="friendId" class="form-control"/>
-
-                <input type="submit" value="Add Friend" class="btn-primary" onclick="addFriend()"/>
+    <div id="addFriend" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Add Friend</h4>
+                </div>
+                <div class="modal-body">
+                    <label for="friendId">Username</label>
+                    <input type="text" name="friendId" id="friendId" class="form-control"/>
+                    <br>
+                    <input type="submit" value="Add Friend" class="btn btn-success" onclick="addFriend()"/>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 </body>
 </html>
